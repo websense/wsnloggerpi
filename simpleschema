@@ -1,0 +1,9 @@
+-- creates a simple single table database for logging
+-- TO USE: run sqlite3 kal001database.db < simpleschema.txt
+
+BEGIN;
+
+CREATE TABLE measurement (timestamp DATE, sensorid TEXT, value NUMERIC, UNIQUE (timestamp,sensorid) ON CONFLICT IGNORE);
+
+COMMIT;
+
