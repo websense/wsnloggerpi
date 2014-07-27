@@ -8,11 +8,15 @@ DBSCHEMA=/home/pi/wsnloggerpi/simpleschema #in case we need to create a DB
 
 LOG=/home/pi/wsnloggerpi/mylog.txt
 
+#sync system time with RTC
+sudo /sbin/hwclock -s
+
 if [ ! -f $DATABASE ] ; then
    echo "$DATABASE not found so will create a new one" >> $LOG
    sqlite3 $DATABASE < $DBSCHEMA
    sudo chmod 775 $DATABASE
 fi
+
 
 #stop the usb reading process, ask nicely first, then be tough
 sudo killall python && sudo killall -9 python
