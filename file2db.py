@@ -6,6 +6,10 @@ import sys
 import sqlite3
 
 debug = False
+if (len(sys.argv) < 2):
+        print "file2db.py expects 2 arguments - exit now"
+	sys.exit(1)
+
 database = sys.argv[1]
 inputfile = sys.argv[2]
 
