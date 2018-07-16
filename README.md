@@ -6,6 +6,13 @@ Sensor network base station: logs input from usb port to files and a database
 From file /home/pi/wsnloggerpi/README
 instructions for setting up a sensor network logger on a raspberry pi
 
+Copy code from here onto the pi
+git clone git://github.com/websense/wsnloggerpi
+
+May need to install
+sudo apt-get install sqlite3
+sudo apt-get install python-serial
+
 0. cd /home/pi/wsnloggerpi
 
 1. (if first time) create the simple data logger database (give yours a unique name)
