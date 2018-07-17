@@ -70,7 +70,6 @@ for l in lines:
                 print ("Error writing channel info to DB "+database)
     if (pktlen == 25): ##==25 for uwafarm 8 sensors
         pos=5
-#       for s in range(1,8): #each sensor
         for sensorID in range(1,9):
             watercontent = float(ss[pos])
             temperature = float(ss[pos+1])
@@ -86,6 +85,7 @@ for l in lines:
             print ("No soil data "+str(pktlen))
 
 try:
+    c.close()
     conn.commit()
     conn.close()
     if debug:
