@@ -3,13 +3,15 @@
 #restart usb and copy usb filled file to db
 
 #edit these lines with the local database name and logger log file name (txt)
-DATABASE=/home/pi/wsnloggerpi/kal001database.db
-DBSCHEMA=/home/pi/wsnloggerpi/simpleschema #in case we need to create a DB
+DATABASE=/home/pi/wsnloggerpi/uwafarmdatabase.db
+DBSCHEMA=/home/pi/wsnloggerpi/simpleschema.txt #in case we need to create a DB
 
 LOG=/home/pi/wsnloggerpi/mylog.txt
+PYTHON=/usr/bin/python3
 
 #sync system time with RTC
-sudo /sbin/hwclock -s
+#sudo /sbin/hwclock -s
+#use network time at UWA farm
 
 if [ ! -f $DATABASE ] ; then
    echo "$DATABASE not found so will create a new one" >> $LOG
@@ -19,16 +21,17 @@ fi
 
 
 #stop the usb reading process, ask nicely first, then be tough
-sudo killall python && sudo killall -9 python
+
+sudo pkill -f usb2files && sudo pkill -9 -f usb2files
 
 #restart the usb reading process
-python /home/pi/wsnloggerpi/usbinput2file.py &
+$PYTHON /home/pi/wsnloggerpi/usb2files.py &
 
 #write the most recent file to database (ls -t is time ordered)
 #TODO if more than one new file ? eg write error will only write most recent
 
 FILE=$(ls -t /home/pi/wsnloggerpi/data/out-*.txt|head -1)
-python /home/pi/wsnloggerpi/file2db.py $DATABASE $FILE
+$PYTHON /home/pi/wsnloggerpi/file2db.py $DATABASE $FILE
 
 #log history
 date >>  $LOG

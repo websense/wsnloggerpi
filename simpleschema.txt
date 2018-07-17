@@ -1,0 +1,16 @@
+-- creates a simple single table database for logging
+-- TO USE: run sqlite3 kal001database.db < simpleschema.txt
+-- UWA farm packet format: stationID, pktnum, battery, water1, temp1, ..., water8, temp8, csum, rssi, noise, snr
+-- 0001,3,6.6,7.20,19.0,4.96,19.0,3.84,19.0,3.76,19.0,3.76,19.0,3.82,19.0,3.63,19.0,3.88,19.0,4429,-42,-96,12
+-- timestamp to be added, sensor values to be extracted 1 to 8
+
+BEGIN;
+
+CREATE TABLE measurement (timestampStr TEXT, timestampUnix INTEGER, stationID TEXT, sensorID INTEGER, watercontent REAL, temperature REAL, 
+       UNIQUE (timestampUnix,stationID,sensorID) ON CONFLICT IGNORE);
+
+CREATE TABLE channel (timestampStr TEXT, timestampUnix INTEGER, stationID TEXT, packetID INTEGER, rrsi INTEGER, noise INTEGER, snr INTEGER,
+        UNIQUE (timestampUnix,stationID) ON CONFLICT IGNORE);
+
+COMMIT;
+
