@@ -36,7 +36,7 @@ if (not isopen):
 mqttc = mqtt.Client()
 url = 'm20.cloudmqtt.com'
 topic = 'test1'
-mqttc.username_pw_set('UWA','uwawsn467')
+mqttc.username_pw_set('UWA','<REPLACEPASSWORD>')
 mqttc.connect(url, 17657)
 
 #get data and write to file
