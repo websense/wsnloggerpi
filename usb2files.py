@@ -37,7 +37,8 @@ mqttc = mqtt.Client()
 url = 'm20.cloudmqtt.com'
 topic = 'test1'
 mqttc.username_pw_set('UWA','<REPLACEPASSWORD>')
-mqttc.connect(url, 17657)
+mqttc.tls_set()
+mqttc.connect(url, 27657)
 
 #get data and write to file
 if (not writetoscreen):
