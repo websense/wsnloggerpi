@@ -1,0 +1,10 @@
+#process for initial set up of gatewaylogger init.d scripts
+#for checking status:  sudo /etc/init.d/gatewaylogger status
+#set execute permissions for the UWA logger script
+sudo chmod +x /etc/init.d/gatewaylogger
+sudo chown root:root /etc/init.d/gatewaylogger
+
+#add script to start up service
+sudo update-rc.d gatewaylogger defaults
+sudo update-rc.d gatewaylogger enable
+

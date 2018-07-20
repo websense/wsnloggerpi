@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 #updated 16 July 2018 for python 3 and uwa farm application
-#reads 8 x vmc and temp data from file and write to DB
+#reads 8 x vmc and temp data from file and write to DB and MQTT
+#Rachel CO and Gino P
+#20 July 2018
+
 import sys
 import sqlite3
+import glob
+import os
+import UWAFarmConfiguration as UWAFarm
 
 debug = False
-#print(len(sys.argv))
 
-if (len(sys.argv) < 2):
-    print ("file2db.py expects 2 arguments: database inputfile")
-    sys.exit(1)
+list_of_files = glob.glob(UWAFarm.UWA_FARM_DATA_DIRECTORY+"*") 
+inputfile = max(list_of_files, key=os.path.getctime)
 
-database = sys.argv[1]
-inputfile = sys.argv[2]
-#print(database)
-#print(inputfile)
+database = UWAFarm.UWA_FARM_DB_NAME
+
 
 try:
     fo = open(inputfile,"r")
@@ -44,7 +46,6 @@ except:
 #checksum, RSSI, noise, SNR
 #0001,3,6.6,
 #7.20,19.0,4.96,19.0,3.84,19.0,3.76,19.0,3.76,19.0,3.82,19.0,3.63,19.0,3.88,19.0,4429,-42,-96,12
-
 #CREATE TABLE measurement (timestampstr DATE, timestamp DATE, stationid TEXT, sensorid TEXT, watercontent NUMERIC, temperature NUMERIC UNIQUE (timestamp,stationid,sensorid) ON CONFLICT IGNORE);
 
 for l in lines:
@@ -63,29 +64,33 @@ for l in lines:
         ssn = int(ss[pktlen-1])
         try:
             c.execute("INSERT OR IGNORE INTO channel VALUES (?,?, ?,?, ?,?,?);",(timestampStr,timestampUnix,stationID,packetID,rssi,noise,ssn))
-            conn.commit()
+            #conn.commit() very slow if done every time
         except:
             #error writing to DB
             if (debug):
                 print ("Error writing channel info to DB "+database)
     if (pktlen == 25): ##==25 for uwafarm 8 sensors
         pos=5
+#       for s in range(1,8): #each sensor
         for sensorID in range(1,9):
-            watercontent = float(ss[pos])
-            temperature = float(ss[pos+1])
-            pos=pos+2
             try:
-                c.execute("INSERT OR IGNORE INTO measurement VALUES (?,?,?,?, ?,?);",(timestampStr,timestampUnix,stationID,sensorID,watercontent,temperature))
-                conn.commit()
+                watercontent = float(ss[pos])
+                temperature = float(ss[pos+1])
+                pos=pos+2
+                try:
+                    c.execute("INSERT OR IGNORE INTO measurement VALUES (?,?,?,?, ?,?);",(timestampStr,timestampUnix,stationID,sensorID,watercontent,temperature))
+                    #conn.commit()
+                except:
+                    if debug:
+                        print ("Error inserting measurement info to DB "+database)
             except:
                 if debug:
-                    print ("Error inserting measurement info to DB "+database)
+                    print ("Error in input data sensor format sensor ID"+str(sensorID))
     else:
         if debug:
             print ("No soil data "+str(pktlen))
 
 try:
-    c.close()
     conn.commit()
     conn.close()
     if debug:

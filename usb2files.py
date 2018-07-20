@@ -4,11 +4,17 @@ import time
 import serial
 from datetime import datetime
 import paho.mqtt.client as mqtt
+import subprocess
+import UWAFarmConfiguration as UWAFarm
+
+subprocess.run(["/usr/bin/nohup","/usr/bin/python3","/home/pi/wsnloggerpi/file2db.py", "&"])
+time.sleep(1)
 
 debug = False
 writetoscreen = False
+MQTTConnected = False
 
-datadir="/home/pi/wsnloggerpi/data/"
+datadir=UWAFarm.UWA_FARM_DATA_DIRECTORY
 
 
 #open usb0
@@ -34,11 +40,16 @@ if (not isopen):
 
 #Setup MQTT
 mqttc = mqtt.Client()
-url = 'm20.cloudmqtt.com'
-topic = 'test1'
-mqttc.username_pw_set('UWA','<REPLACEPASSWORD>')
+url = UWAFarm.CLOUD_MQTT_BROKER
+topic = UWAFarm.CLOUD_MQTT_TOPIC 
+mqttc.username_pw_set(UWAFarm.CLOUD_MQTT_USER_NAME,UWAFarm.CLOUD_MQTT_PASSWORD)
 mqttc.tls_set()
-mqttc.connect(url, 27657)
+try:
+    mqttc.connect(url, UWAFarm.CLOUD_MQTT_SSL_PORT)
+    MQTTConnected = True
+except:
+    MQTTConnected = False
+    print("MQTT Could not connect")
 
 #get data and write to file
 if (not writetoscreen):
@@ -59,8 +70,12 @@ while (True):
                 if debug:
                     print ("File Exception: "+outputfile)
             try:
+                if not MQTTConnected:
+                    mqttc.connect(url, UWAFarm.CLOUD_MQTT_SSL_PORT)
+                    MQTTConnected = True
                 mqttc.publish(topic, tstr)
             except :
+                MQTTConnected = False
                 if debug:
                     print ("MQTT Exception: ")
 
